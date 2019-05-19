@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
@@ -10,12 +12,17 @@ import (
 )
 
 var opts struct {
+	Version  bool   `short:"v" long:"version" description:"Show version"`
 	EnvFile  string `short:"e" long:"env" default:"examples/basic-test/env.json" description:"Environment file"`
 	TestFile string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
 }
 
 func main() {
 	flags.Parse(&opts)
+	if opts.Version {
+		fmt.Println("v0.0.1")
+		os.Exit(0)
+	}
 
 	loadEnvFile(opts.EnvFile)
 	loadTestFile(opts.TestFile)

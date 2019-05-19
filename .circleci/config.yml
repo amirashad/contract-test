@@ -35,6 +35,16 @@ jobs:
       - attach_workspace: 
           at: .
       - run: pwd && ls -lah
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            VERSION=$(./contract-test --version)
+            echo ${VERSION}
+            echo ${GITHUB_TOKEN}
+            mkdir artifacts
+            cp ./contract-test ./artifacts
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
   contract-test_workflow:
