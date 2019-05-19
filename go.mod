@@ -1,4 +1,4 @@
-module github.com/amirasahad/contract-testing-tool
+module github.com/amirashad/contract-test
 
 require (
 	github.com/jessevdk/go-flags v1.4.0

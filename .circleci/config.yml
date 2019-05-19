@@ -1,0 +1,46 @@
+version: 2.1
+
+executors:
+  golang:
+    docker: 
+      - image: circleci/golang
+
+commands:
+  build:
+    steps:
+      - run:
+          name: Build
+          command: GOOS=linux GOARCH=amd64 go build
+  unit_test:
+    steps:
+      - run:
+          name: Unit Test
+          command: go test
+
+jobs:
+  validate:
+    executor: golang
+    steps:
+      - checkout
+      - build
+      - unit_test
+      - persist_to_workspace: 
+          root: .
+          paths:
+            - .
+  deploy:
+    executor: golang
+    steps:
+      - checkout
+      - attach_workspace: 
+          at: ../
+      - run: ls -lah
+
+workflows:
+  contract-test_workflow:
+    jobs:
+      - validate
+      - deploy:
+          filters:
+            branches:
+              only: master
