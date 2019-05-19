@@ -27,14 +27,14 @@ jobs:
       - persist_to_workspace: 
           root: .
           paths:
-            - .
+            - ./contract-test
   deploy:
     executor: golang
     steps:
       - checkout
       - attach_workspace: 
-          at: ../
-      - run: ls -lah
+          at: .
+      - run: pwd && ls -lah
 
 workflows:
   contract-test_workflow:
