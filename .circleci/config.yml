@@ -10,9 +10,7 @@ commands:
     steps:
       - run:
           name: Build
-          command: GOOS=linux GOARCH=amd64 go build
-  unit_test:
-    steps:
+          command: go build
       - run:
           name: Unit Test
           command: go test
@@ -23,27 +21,33 @@ jobs:
     steps:
       - checkout
       - build
-      - unit_test
-      - persist_to_workspace: 
-          root: .
-          paths:
-            - ./contract-test
+      # - persist_to_workspace: 
+      #     root: .
+      #     paths:
+      #       - ./contract-test
   deploy:
     executor: golang
     steps:
       - checkout
-      - attach_workspace: 
-          at: .
-      - run: pwd && ls -lah
+      # - attach_workspace: 
+      #     at: .
+      - run: 
+          name: Build for multiple architectures
+          command: |
+            for GOOS in darwin linux windows; do
+              for GOARCH in 386 amd64; do
+                  EXTENSION=""
+                  if [[ "${GOOS}" == "windows" ]]; then EXTENSION=".exe"; fi
+                  go build -v -o artifacts/contract-test_${GOOS}_${GOARCH}${EXTENSION}
+              done
+            done
+      - run: pwd && ls -lah artifacts/
+      - run: ls -lah 
       - run:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            VERSION=$(./contract-test --version)
-            echo ${VERSION}
-            echo ${GITHUB_TOKEN}
-            mkdir artifacts
-            cp ./contract-test ./artifacts
+            VERSION=$(./artifacts/contract-test_linux_amd64 --version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
