@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,40 +10,29 @@ import (
 )
 
 var opts struct {
-	Profile string `short:"p" long:"profile" default:"default" description:"Run profile"`
-	File    string `short:"f" long:"file" default:"examples/basic-test/health.json" description:"Test file"`
+	EnvFile  string `short:"e" long:"env" default:"examples/basic-test/env.json" description:"Environment file"`
+	TestFile string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
 }
 
 func main() {
 	flags.Parse(&opts)
 
-	log.Println(opts.Profile)
+	loadEnvFile(opts.EnvFile)
+	loadTestFile(opts.TestFile)
+	configureEndpoints()
 
-	jsonFile, err := ioutil.ReadFile(opts.File)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// fmt.Println(string(jsonFile))
-
-	var test Test
-	err = json.Unmarshal(jsonFile, &test)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(test)
-
-	// var parsed map[string]interface{}
-	// err = json.Unmarshal(jsonFile, &parsed)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(parsed)
-
-	actualResponse := sendRequest(test.Request)
+	actualResponse := sendRequest(TestData.Request)
 	log.Println(actualResponse)
-	checkCode(test.Response, actualResponse)
-	checkHeaders(test.Response, actualResponse)
-	checkBody(test.Response, actualResponse)
+	checkCode(TestData.Response, actualResponse)
+	checkHeaders(TestData.Response, actualResponse)
+	checkBody(TestData.Response, actualResponse)
+}
+
+func configureEndpoints() {
+	for k, v := range EnvVars.Env {
+		envVar := "${env." + k + "}"
+		TestData.Request.URL = strings.Replace(TestData.Request.URL, envVar, v, 1)
+	}
 }
 
 func sendRequest(request Request) Response {
@@ -52,9 +40,9 @@ func sendRequest(request Request) Response {
 		// CheckRedirect: redirectPolicyFunc,
 	}
 
-	url := strings.Replace(request.URL, "${env.USERS_ENDPOINT}", "http://localhost:80", 1)
+	// url := strings.Replace(request.URL, "${env.USERS_ENDPOINT}", "http://localhost:80", 1)
 
-	req, err := http.NewRequest(request.Method, url, nil)
+	req, err := http.NewRequest(request.Method, request.URL, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
