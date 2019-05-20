@@ -20,7 +20,7 @@ var opts struct {
 func main() {
 	flags.Parse(&opts)
 	if opts.Version {
-		fmt.Println("v0.0.1")
+		fmt.Println("v0.0.2")
 		os.Exit(0)
 	}
 
