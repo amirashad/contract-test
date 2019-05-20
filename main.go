@@ -11,16 +11,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var AppVersion = "v0.0.2"
+
 var opts struct {
-	Version  bool   `short:"v" long:"version" description:"Show version"`
-	EnvFile  string `short:"e" long:"env" default:"examples/basic-test/env.json" description:"Environment file"`
+	Version  bool   `long:"version" description:"Show version"`
+	EnvFile  string `short:"e" long:"envfile" default:"examples/basic-test/env.json" description:"Environment file"`
 	TestFile string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
 }
 
 func main() {
 	flags.Parse(&opts)
 	if opts.Version {
-		fmt.Println("v0.0.2")
+		fmt.Println(AppVersion)
 		os.Exit(0)
 	}
 
