@@ -43,11 +43,7 @@ func configureEndpoints() {
 }
 
 func sendRequest(request Request) Response {
-	client := &http.Client{
-		// CheckRedirect: redirectPolicyFunc,
-	}
-
-	// url := strings.Replace(request.URL, "${env.USERS_ENDPOINT}", "http://localhost:80", 1)
+	client := &http.Client{}
 
 	req, err := http.NewRequest(request.Method, request.URL, nil)
 	if err != nil {
@@ -71,11 +67,6 @@ func sendRequest(request Request) Response {
 	response.Body = string(body)
 
 	return response
-
-	// var responseObj map[string]interface{}
-
-	// http.Get(req.Method, req.URL)
-	// http.Post(req.Method, req.URL)
 }
 
 func checkCode(expected Response, actual Response) {
