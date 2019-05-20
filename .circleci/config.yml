@@ -21,16 +21,10 @@ jobs:
     steps:
       - checkout
       - build
-      # - persist_to_workspace: 
-      #     root: .
-      #     paths:
-      #       - ./contract-test
   deploy:
     executor: golang
     steps:
       - checkout
-      # - attach_workspace: 
-      #     at: .
       - run: 
           name: Build for multiple architectures
           command: |
@@ -41,8 +35,9 @@ jobs:
                   go build -v -o artifacts/contract-test_${GOOS}_${GOARCH}${EXTENSION}
               done
             done
-      - run: pwd && ls -lah artifacts/
-      - run: ls -lah 
+      - run: 
+          name: List artifacts
+          command: ls -lah artifacts/
       - run:
           name: "Publish Release on GitHub"
           command: |
