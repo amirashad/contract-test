@@ -33,9 +33,10 @@ func shutdown(w http.ResponseWriter, r *http.Request) {
 }
 
 type User struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
+	ID      int     `json:"id"`
+	Name    string  `json:"name"`
+	Surname string  `json:"surname"`
+	Weight  float32 `json:"weight"`
 }
 
 func user(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +47,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := User{ID: 13, Name: "Rashad"}
+	user := User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25}
 
 	jsonData, err := json.Marshal(user)
 	if err != nil {

@@ -14,7 +14,8 @@
         "body": {
             "id": 13,
             "name": "Rashad",
-            "surname": "Amirjanov"
+            "surname": "Amirjanov",
+            "weight": 81.25
         }
     }
 }
