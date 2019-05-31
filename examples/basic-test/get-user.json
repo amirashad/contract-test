@@ -1,4 +1,5 @@
 {
+    "name": "Get user",
     "request": {
         "method": "GET",
         "url": "${env.USERS_ENDPOINT}/v1/users/1",

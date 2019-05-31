@@ -1,4 +1,5 @@
 {
+    "name": "Get health status",
     "request": {
         "method": "GET",
         "headers": {

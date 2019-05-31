@@ -1,3 +1,6 @@
+## 0.2.0 (May 31, 2019)
+Add name to tests and show this in startup
+
 ## 0.1.0 (May 31, 2019)
 Add functionality to check simple JSON on GET requests
 
