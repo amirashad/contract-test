@@ -14,6 +14,17 @@ commands:
       - run:
           name: Unit Test
           command: go test
+  example_test:
+      steps:
+        - run: 
+            name: Run mock server & execute example contract tests
+            command: |
+              go run examples/basic-test/main.go &
+              sleep 1s
+              echo "============ TEST 1 ==================="
+              ./contract-test -t examples/basic-test/health.json
+              echo "============ TEST 2 ==================="
+              ./contract-test -t examples/basic-test/get-user.json
 
 jobs:
   validate:
@@ -21,6 +32,7 @@ jobs:
     steps:
       - checkout
       - build
+      - example_test
   deploy:
     executor: golang
     steps:
@@ -28,13 +40,9 @@ jobs:
       - run: 
           name: Build for multiple architectures
           command: |
-            for GOOS in darwin linux windows; do
-              for GOARCH in 386 amd64; do
-                  EXTENSION=""
-                  if [[ "${GOOS}" == "windows" ]]; then EXTENSION=".exe"; fi
-                  go build -v -o artifacts/contract-test_${GOOS}_${GOARCH}${EXTENSION}
-              done
-            done
+            GOOS=darwin  GOARCH=amd64 go build -o artifacts/${CIRCLE_PROJECT_REPONAME}_darwin_amd64
+            GOOS=linux   GOARCH=amd64 go build -o artifacts/${CIRCLE_PROJECT_REPONAME}_linux_amd64
+            GOOS=windows GOARCH=amd64 go build -o artifacts/${CIRCLE_PROJECT_REPONAME}_windows_amd64.exe
       - run: 
           name: List artifacts
           command: ls -lah artifacts/
@@ -42,7 +50,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             go get github.com/tcnksm/ghr
-            VERSION=$(./artifacts/contract-test_linux_amd64 --version)
+            VERSION=$(./artifacts/${CIRCLE_PROJECT_REPONAME}_linux_amd64 --version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artifacts/
 
 workflows:
