@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -14,8 +15,8 @@ func main() {
 func startHTTPServing() {
 	http.HandleFunc("/v1/users", users)
 	http.HandleFunc("/v1/users/1", user)
-	http.HandleFunc("/readiness", health)
 	http.HandleFunc("/health", health)
+	http.HandleFunc("/shutdown", shutdown)
 
 	port := "8080"
 	log.Println("Starting server at port: ", port)
@@ -24,6 +25,11 @@ func startHTTPServing() {
 
 func health(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "OK!")
+}
+
+func shutdown(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "exiting...")
+	os.Exit(1)
 }
 
 type User struct {
