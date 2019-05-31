@@ -21,9 +21,7 @@ commands:
             command: |
               go run examples/basic-test/main.go &
               sleep 1s
-              echo "============ TEST 1 ==================="
               ./contract-test -t examples/basic-test/health.json
-              echo "============ TEST 2 ==================="
               ./contract-test -t examples/basic-test/get-user.json
 
 jobs:

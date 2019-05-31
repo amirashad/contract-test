@@ -23,6 +23,7 @@ type Response struct {
 }
 
 type Test struct {
+	Name     string   `json:"name"`
 	Request  Request  `json:"request"`
 	Response Response `json:"response"`
 }
@@ -40,5 +41,5 @@ func loadTestFile(filename string) {
 		log.Fatal(err)
 	}
 
-	log.Println("TestData:", TestData)
+	log.Println("======================== TEST:", TestData.Name, "========================")
 }
