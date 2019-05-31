@@ -58,16 +58,16 @@ func sendRequest(request Request) Response {
 		log.Fatal(err)
 	}
 
-	var response Response
-	response.Code = resp.StatusCode
-	response.Headers = resp.Header
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	response.Body = string(body)
 
+	response := Response{
+		resp.Header,
+		resp.StatusCode,
+		body,
+	}
 	return response
 }
 
@@ -94,13 +94,18 @@ func checkHeaders(expected Response, actual Response) {
 }
 
 func checkBody(expected Response, actual Response) {
-	expectedBody := expected.Body.(string)
-	actualBody := actual.Body.(string)
+	contentType := expected.Headers.(map[string]interface{})["Content-Type"].(string)
+	log.Println("expected Content-Type:", contentType)
 
-	log.Println(expectedBody)
-	log.Println(actualBody)
+	if strings.Contains(contentType, "text") {
+		expectedBody := expected.Body.(string)
+		actualBody := string(actual.Body.([]byte))
 
-	if expectedBody != actualBody {
-		log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+		log.Println(expectedBody)
+		log.Println(actualBody)
+
+		if expectedBody != actualBody {
+			log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+		}
 	}
 }
