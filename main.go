@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 
 	flags "github.com/jessevdk/go-flags"
@@ -107,5 +109,30 @@ func checkBody(expected Response, actual Response) {
 		if expectedBody != actualBody {
 			log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
 		}
+	} else if strings.Contains(contentType, "json") {
+		switch expectedBody := expected.Body.(type) {
+		case map[string]interface{}:
+			var actualBody map[string]interface{}
+			json.Unmarshal(actual.Body.([]byte), &actualBody)
+			log.Println(expectedBody)
+			log.Println("are equal: ", deepEqual(expectedBody, actualBody))
+		}
+	} else {
+		log.Error("Not supported Content-Type: ", contentType)
 	}
+}
+
+func deepEqual(m1, m2 map[string]interface{}) bool {
+	if reflect.DeepEqual(m1, m2) {
+		return true
+	}
+
+	equals := true
+	for k1, v1 := range m1 {
+		if v1 != m2[k1] {
+			equals = false
+			log.Error("Not equals: ", k1, " values: expected: ", v1, ", actual: ", m2[k1])
+		}
+	}
+	return equals
 }
