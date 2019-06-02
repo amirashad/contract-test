@@ -14,6 +14,7 @@ func main() {
 
 func startHTTPServing() {
 	http.HandleFunc("/v1/users", users)
+	http.HandleFunc("/v1/states", states)
 	http.HandleFunc("/v1/users/1", user)
 	http.HandleFunc("/health", health)
 	http.HandleFunc("/shutdown", shutdown)
@@ -69,10 +70,34 @@ func users(w http.ResponseWriter, r *http.Request) {
 	}
 
 	users := []User{
-		User{ID: 13, Name: "Rashad"},
+		User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25},
+		User{ID: 14, Name: "Pasha", Surname: "Amirjanov", Weight: 18.5},
 	}
 
 	jsonData, err := json.Marshal(users)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(jsonData)
+}
+
+func states(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.Method, " ", r.URL)
+	if r.Method != http.MethodGet {
+		log.Println("method not allowed: ", r.Method)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	states := []string{
+		"OPEN", "CLOSED", "PENDING",
+	}
+
+	jsonData, err := json.Marshal(states)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)

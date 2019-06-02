@@ -1,3 +1,6 @@
+## 0.3.0 (Jun 02, 2019)
+Add functionality to check JSON array on GET requests
+
 ## 0.2.0 (May 31, 2019)
 Add name to tests and show this in startup
 

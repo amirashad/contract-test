@@ -1,0 +1,30 @@
+{
+    "name": "Get users",
+    "request": {
+        "method": "GET",
+        "url": "${env.USERS_ENDPOINT}/v1/users",
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    },
+    "response": {
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "code": 200,
+        "body": [
+            {
+                "id": 13,
+                "surname": "Amirjanov",
+                "name": "Rashad",
+                "weight": 81.25
+            },
+            {
+                "id": 14,
+                "name": "Pasha",
+                "surname": "Amirjanov",
+                "weight": 18.5
+            }
+        ]
+    }
+}

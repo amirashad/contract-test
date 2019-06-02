@@ -1,0 +1,21 @@
+{
+    "name": "Get users",
+    "request": {
+        "method": "GET",
+        "url": "${env.USERS_ENDPOINT}/v1/states",
+        "headers": {
+            "Content-Type": "application/json"
+        }
+    },
+    "response": {
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "code": 200,
+        "body": [
+            "OPEN",
+            "CLOSED",
+            "PENDING"
+        ]
+    }
+}
