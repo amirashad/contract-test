@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.2.0"
+var appVersion = "v0.3.0"
 
 var opts struct {
 	Version  bool   `long:"version" description:"Show version"`
@@ -115,7 +115,23 @@ func checkBody(expected Response, actual Response) {
 			var actualBody map[string]interface{}
 			json.Unmarshal(actual.Body.([]byte), &actualBody)
 			log.Println(expectedBody)
-			log.Println("are equal: ", deepEqual(expectedBody, actualBody))
+			equals := deepEqual(expectedBody, actualBody)
+			log.Println("are equal: ", equals)
+			if !equals {
+				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+			}
+		case []interface{}:
+			var actualBody []interface{}
+			json.Unmarshal(actual.Body.([]byte), &actualBody)
+			log.Println("array", expectedBody, "actualBody", actualBody)
+			log.Println(expectedBody)
+			equals := reflect.DeepEqual(expectedBody, actualBody)
+			log.Println("are equal: ", equals)
+			if !equals {
+				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+			}
+		default:
+			log.Error("not supported JSON object")
 		}
 	} else {
 		log.Error("Not supported Content-Type: ", contentType)
@@ -135,4 +151,8 @@ func deepEqual(m1, m2 map[string]interface{}) bool {
 		}
 	}
 	return equals
+}
+
+func deepEqualArray(a1, a2 []map[string]interface{}) bool {
+	return reflect.DeepEqual(a1, a2)
 }
