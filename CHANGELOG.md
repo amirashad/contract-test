@@ -1,3 +1,6 @@
+## 0.3.1 (Jun 02, 2019)
+Exit with error code on difference of contracts
+
 ## 0.3.0 (Jun 02, 2019)
 Add functionality to check JSON array on GET requests
 

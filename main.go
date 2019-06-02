@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.3.0"
+var appVersion = "v0.3.1"
 
 var opts struct {
 	Version  bool   `long:"version" description:"Show version"`
@@ -34,9 +34,12 @@ func main() {
 
 	actualResponse := sendRequest(TestData.Request)
 	log.Println(actualResponse)
-	checkCode(TestData.Response, actualResponse)
-	checkHeaders(TestData.Response, actualResponse)
-	checkBody(TestData.Response, actualResponse)
+	result := checkCode(TestData.Response, actualResponse)
+	result = result && checkHeaders(TestData.Response, actualResponse)
+	result = result && checkBody(TestData.Response, actualResponse)
+	if !result {
+		os.Exit(1)
+	}
 }
 
 func configureEndpoints() {
@@ -73,17 +76,20 @@ func sendRequest(request Request) Response {
 	return response
 }
 
-func checkCode(expected Response, actual Response) {
+func checkCode(expected Response, actual Response) bool {
 	if expected.Code != actual.Code {
 		log.Error("Status codes are different: actual: ", actual.Code, ", expected: ", expected.Code)
+		return false
 	}
+	return true
 }
 
-func checkHeaders(expected Response, actual Response) {
+func checkHeaders(expected Response, actual Response) bool {
 	expectedHeaders := expected.Headers.(map[string]interface{})
 	actualHeaders := actual.Headers.(http.Header)
 
 	log.Println(expectedHeaders)
+	result := true
 	for k, v := range expectedHeaders {
 		log.Println(k, v.(string))
 		actualValue := actualHeaders.Get(k)
@@ -91,13 +97,16 @@ func checkHeaders(expected Response, actual Response) {
 		log.Println("values=expected:", expectedValue, ", actual: ", actualValue)
 		if actualValue != expectedValue {
 			log.Error("Headers are different: actual: ", actualValue, ", expected: ", expectedValue)
+			result = false
 		}
 	}
+	return result
 }
 
-func checkBody(expected Response, actual Response) {
+func checkBody(expected Response, actual Response) bool {
 	contentType := expected.Headers.(map[string]interface{})["Content-Type"].(string)
 	log.Println("expected Content-Type:", contentType)
+	result := true
 
 	if strings.Contains(contentType, "text") {
 		expectedBody := expected.Body.(string)
@@ -108,6 +117,7 @@ func checkBody(expected Response, actual Response) {
 
 		if expectedBody != actualBody {
 			log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+			result = false
 		}
 	} else if strings.Contains(contentType, "json") {
 		switch expectedBody := expected.Body.(type) {
@@ -119,6 +129,7 @@ func checkBody(expected Response, actual Response) {
 			log.Println("are equal: ", equals)
 			if !equals {
 				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+				result = false
 			}
 		case []interface{}:
 			var actualBody []interface{}
@@ -129,13 +140,18 @@ func checkBody(expected Response, actual Response) {
 			log.Println("are equal: ", equals)
 			if !equals {
 				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
+				result = false
 			}
 		default:
 			log.Error("not supported JSON object")
+			result = false
 		}
 	} else {
 		log.Error("Not supported Content-Type: ", contentType)
+		result = false
 	}
+
+	return result
 }
 
 func deepEqual(m1, m2 map[string]interface{}) bool {
