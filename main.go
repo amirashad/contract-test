@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.3.0"
+var appVersion = "v0.3.1"
 
 var opts struct {
 	Version  bool   `long:"version" description:"Show version"`

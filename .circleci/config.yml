@@ -19,7 +19,6 @@ commands:
         - run: 
             name: Run mock server & execute example contract tests
             command: |
-              set -e
               go run examples/basic-test/main.go &
               sleep 2s
               ./contract-test -t examples/basic-test/health.json
