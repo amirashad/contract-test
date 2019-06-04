@@ -1,5 +1,11 @@
 # Change log
 
+## v0.3.2 (2019-06-04)
+
+ - Cover main methods with Unit Tests
+ - Fix major issues when request or response bodies are null
+ - Check numbers correctly
+
 ## v0.3.1 (2019-06-02)
 
  - Exit with error code on difference of contracts

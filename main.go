@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.3.1"
+var appVersion = "v0.3.2"
 
 var opts struct {
 	Version  bool   `long:"version" description:"Show version"`
@@ -34,10 +34,8 @@ func main() {
 
 	actualResponse := sendRequest(TestData.Request)
 	log.Println(actualResponse)
-	result := checkCode(TestData.Response, actualResponse)
-	result = result && checkHeaders(TestData.Response, actualResponse)
-	result = result && checkBody(TestData.Response, actualResponse)
-	if !result {
+
+	if !check(TestData.Response, actualResponse) {
 		os.Exit(1)
 	}
 }
@@ -76,37 +74,68 @@ func sendRequest(request Request) Response {
 	return response
 }
 
-func checkCode(expected Response, actual Response) bool {
-	if expected.Code != actual.Code {
-		log.Error("Status codes are different: actual: ", actual.Code, ", expected: ", expected.Code)
-		return false
+func check(expected Response, actual Response) bool {
+	result := true
+	if err := checkCode(expected, actual); err != nil {
+		log.Error(err)
+		result = false
 	}
-	return true
+	if err := checkHeaders(expected, actual); err != nil {
+		log.Error(err)
+		result = false
+	}
+	if err := checkBody(expected, actual); err != nil {
+		log.Error(err)
+		result = false
+	}
+	return result
 }
 
-func checkHeaders(expected Response, actual Response) bool {
+func checkCode(expected Response, actual Response) error {
+	if expected.Code != actual.Code {
+		return fmt.Errorf("Status codes are different: actual: %d, expected: %d", actual.Code, expected.Code)
+	}
+	return nil
+}
+
+func checkHeaders(expected Response, actual Response) error {
+	if expected.Headers == nil {
+		return nil // there is no any expected headers
+	}
+
 	expectedHeaders := expected.Headers.(map[string]interface{})
+	if len(expectedHeaders) > 0 && actual.Headers == nil {
+		return fmt.Errorf("Headers are different: actual: %v, expected: %v", actual.Headers, expectedHeaders)
+	}
 	actualHeaders := actual.Headers.(http.Header)
 
 	log.Println(expectedHeaders)
-	result := true
 	for k, v := range expectedHeaders {
 		log.Println(k, v.(string))
 		actualValue := actualHeaders.Get(k)
 		expectedValue := v.(string)
 		log.Println("values=expected:", expectedValue, ", actual: ", actualValue)
 		if actualValue != expectedValue {
-			log.Error("Headers are different: actual: ", actualValue, ", expected: ", expectedValue)
-			result = false
+			return fmt.Errorf("Headers are different: actual: %v, expected: %v", actualValue, expectedValue)
 		}
 	}
-	return result
+	return nil
 }
 
-func checkBody(expected Response, actual Response) bool {
-	contentType := expected.Headers.(map[string]interface{})["Content-Type"].(string)
+func checkBody(expected Response, actual Response) error {
+	if expected.Body == nil {
+		return nil // there is no any expected body
+	}
+
+	contentType := "text/plain"
+	if expected.Headers != nil {
+		contentType = expected.Headers.(map[string]interface{})["Content-Type"].(string)
+	}
 	log.Println("expected Content-Type:", contentType)
-	result := true
+
+	if actual.Body == nil {
+		return fmt.Errorf("Bodies are different: actual: %v, expected: %v", nil, expected.Body)
+	}
 
 	if strings.Contains(contentType, "text") {
 		expectedBody := expected.Body.(string)
@@ -116,8 +145,7 @@ func checkBody(expected Response, actual Response) bool {
 		log.Println(actualBody)
 
 		if expectedBody != actualBody {
-			log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
-			result = false
+			return fmt.Errorf("Bodies are different: actual: %v, expected: %v", actualBody, expectedBody)
 		}
 	} else if strings.Contains(contentType, "json") {
 		switch expectedBody := expected.Body.(type) {
@@ -128,8 +156,7 @@ func checkBody(expected Response, actual Response) bool {
 			equals := deepEqual(expectedBody, actualBody)
 			log.Println("are equal: ", equals)
 			if !equals {
-				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
-				result = false
+				return fmt.Errorf("Bodies are different: actual: %v, expected: %v", actualBody, expectedBody)
 			}
 		case []interface{}:
 			var actualBody []interface{}
@@ -139,19 +166,16 @@ func checkBody(expected Response, actual Response) bool {
 			equals := reflect.DeepEqual(expectedBody, actualBody)
 			log.Println("are equal: ", equals)
 			if !equals {
-				log.Error("Bodies are different: actual: ", actualBody, ", expected: ", expectedBody)
-				result = false
+				return fmt.Errorf("Bodies are different: actual: %v, expected: %v", actualBody, expectedBody)
 			}
 		default:
-			log.Error("not supported JSON object")
-			result = false
+			return fmt.Errorf("not supported JSON object type")
 		}
 	} else {
-		log.Error("Not supported Content-Type: ", contentType)
-		result = false
+		return fmt.Errorf("Not supported Content-Type: %s", contentType)
 	}
 
-	return result
+	return nil
 }
 
 func deepEqual(m1, m2 map[string]interface{}) bool {
@@ -163,7 +187,15 @@ func deepEqual(m1, m2 map[string]interface{}) bool {
 	for k1, v1 := range m1 {
 		if v1 != m2[k1] {
 			equals = false
-			log.Error("Not equals: ", k1, " values: expected: ", v1, ", actual: ", m2[k1])
+			log.Error("Not equals: ", k1, " values: expected: ", v1, ", actual: ", m2[k1], ", types:", reflect.TypeOf(v1), reflect.TypeOf(m2[k1]))
+			if b1, a1 := isNumber(v1); b1 == true {
+				if b2, a2 := isNumber(m2[k1]); b2 == true {
+					log.Info("Both of them are number, so checking again...")
+					if a1 == a2 {
+						equals = true
+					}
+				}
+			}
 		}
 	}
 	return equals
@@ -171,4 +203,36 @@ func deepEqual(m1, m2 map[string]interface{}) bool {
 
 func deepEqualArray(a1, a2 []map[string]interface{}) bool {
 	return reflect.DeepEqual(a1, a2)
+}
+
+func isNumber(a interface{}) (bool, float64) {
+	switch a.(type) {
+	case float64:
+		return true, a.(float64)
+	case float32:
+		return true, float64(a.(float32))
+	case int:
+		return true, float64(a.(int))
+	case int8:
+		return true, float64(a.(int8))
+	case int16:
+		return true, float64(a.(int16))
+	case int32:
+		return true, float64(a.(int32))
+	case int64:
+		return true, float64(a.(int64))
+	case uint:
+		return true, float64(a.(uint))
+	case uint8:
+		return true, float64(a.(uint8))
+	case uint16:
+		return true, float64(a.(uint16))
+	case uint32:
+		return true, float64(a.(uint32))
+	case uint64:
+		return true, float64(a.(uint64))
+	default:
+		log.Println("not found")
+		return false, 0
+	}
 }
