@@ -1,4 +1,4 @@
-# Changelog
+# Change log
 
 ## v0.3.1 (2019-06-02)
 
