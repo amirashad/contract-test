@@ -1,14 +1,21 @@
-## 0.3.1 (Jun 02, 2019)
-Exit with error code on difference of contracts
+# Changelog
 
-## 0.3.0 (Jun 02, 2019)
-Add functionality to check JSON array on GET requests
+## v0.3.1 (2019-06-02)
 
-## 0.2.0 (May 31, 2019)
-Add name to tests and show this in startup
+ - Exit with error code on difference of contracts
 
-## 0.1.0 (May 31, 2019)
-Add functionality to check simple JSON on GET requests
+## v0.3.0 (2019-06-02)
 
-## 0.0.2 (May 20, 2019)
-Add functionality to check string bodies on GET requests
+ - Add functionality to check JSON array on GET requests
+
+## v0.2.0 (2019-05-31)
+
+ - Add name to tests and show this in startup
+
+## v0.1.0 (2019-05-31)
+
+ - Add functionality to check simple JSON on GET requests
+
+## v0.0.2 (2019-06-20)
+
+ - Add functionality to check string bodies on GET requests
