@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -42,47 +43,72 @@ type User struct {
 
 func user(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method, " ", r.URL)
-	if r.Method != http.MethodGet {
+	if r.Method == http.MethodGet {
+		user := User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25}
+
+		jsonData, err := json.Marshal(user)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(jsonData)
+	} else {
 		log.Println("method not allowed: ", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-
-	user := User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25}
-
-	jsonData, err := json.Marshal(user)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(jsonData)
 }
 
 func users(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method, " ", r.URL)
-	if r.Method != http.MethodGet {
+	if r.Method == http.MethodGet {
+		users := []User{
+			User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25},
+			User{ID: 14, Name: "Pasha", Surname: "Amirjanov", Weight: 18.5},
+		}
+
+		jsonData, err := json.Marshal(users)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(jsonData)
+	} else if r.Method == http.MethodPost {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		var user User
+		if json.Unmarshal(data, &user) != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		user.ID = 1
+		jsonData, err := json.Marshal(user)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(jsonData)
+	} else {
 		log.Println("method not allowed: ", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-
-	users := []User{
-		User{ID: 13, Name: "Rashad", Surname: "Amirjanov", Weight: 81.25},
-		User{ID: 14, Name: "Pasha", Surname: "Amirjanov", Weight: 18.5},
-	}
-
-	jsonData, err := json.Marshal(users)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(jsonData)
 }
 
 func states(w http.ResponseWriter, r *http.Request) {
