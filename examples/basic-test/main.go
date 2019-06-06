@@ -113,23 +113,35 @@ func users(w http.ResponseWriter, r *http.Request) {
 
 func states(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Method, " ", r.URL)
-	if r.Method != http.MethodGet {
+	if r.Method == http.MethodGet {
+		states := []string{
+			"OPEN", "CLOSED", "PENDING",
+		}
+
+		jsonData, err := json.Marshal(states)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(jsonData)
+	} else if r.Method == http.MethodPost {
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		createdState := string(data)
+
+		w.Header().Add("Content-Type", "text/plain")
+		w.Write([]byte(createdState))
+	} else {
 		log.Println("method not allowed: ", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-
-	states := []string{
-		"OPEN", "CLOSED", "PENDING",
-	}
-
-	jsonData, err := json.Marshal(states)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(jsonData)
 }

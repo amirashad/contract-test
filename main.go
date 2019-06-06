@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.3.2"
+var appVersion = "v0.4.0"
 
 var opts struct {
 	Version  bool   `long:"version" description:"Show version"`
@@ -48,13 +49,31 @@ func configureEndpoints() {
 }
 
 func sendRequest(request Request) Response {
+	contentType := "text/plain"
+	if len(request.Headers.ContentType) > 0 {
+		contentType = request.Headers.ContentType
+	}
+	log.Println("request Content-Type:", contentType)
+
+	var reqData []byte
+	if strings.Contains(contentType, "text") {
+		reqData = []byte(request.Body.(string))
+	} else if strings.Contains(contentType, "json") {
+		reqDat, err := json.Marshal(request.Body)
+		if err != nil {
+			log.Error("Can't marshall request body to []byte: ", request.Body)
+		}
+		reqData = reqDat
+	}
+
 	client := &http.Client{}
 
-	req, err := http.NewRequest(request.Method, request.URL, nil)
+	req, err := http.NewRequest(request.Method, request.URL, bytes.NewBuffer(reqData))
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println(*req)
+	req.Header.Set("Content-Type", contentType)
 
 	resp, err := client.Do(req)
 	if err != nil {
