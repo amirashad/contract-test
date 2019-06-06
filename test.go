@@ -13,7 +13,7 @@ type Request struct {
 		ContentType string `json:"Content-Type"`
 	} `json:"headers"`
 	URL  string      `json:"url"`
-	Data interface{} `json:"data"`
+	Body interface{} `json:"body"`
 }
 
 type Response struct {

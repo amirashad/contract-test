@@ -1,0 +1,18 @@
+{
+    "name": "Create user",
+    "request": {
+        "method": "POST",
+        "url": "${env.USERS_ENDPOINT}/v1/states",
+        "headers": {
+            "Content-Type": "text/plain"
+        },
+        "body": "NEW_STATE"
+    },
+    "response": {
+        "headers": {
+            "Content-Type": "text/plain"
+        },
+        "code": 200,
+        "body": "NEW_STATE"
+    }
+}

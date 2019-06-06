@@ -1,5 +1,9 @@
 # Change log
 
+## v0.4.0 (2019-06-06)
+
+ - Support POST requests with string and JSON data
+
 ## v0.3.2 (2019-06-04)
 
  - Cover main methods with Unit Tests

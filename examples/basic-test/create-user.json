@@ -1,0 +1,27 @@
+{
+    "name": "Create user",
+    "request": {
+        "method": "POST",
+        "url": "${env.USERS_ENDPOINT}/v1/users",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": {
+            "name": "Rashad",
+            "surname": "Amirjanov",
+            "weight": 81.25
+        }
+    },
+    "response": {
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "code": 200,
+        "body": {
+            "id": 1,
+            "name": "Rashad",
+            "surname": "Amirjanov",
+            "weight": 81.25
+        }
+    }
+}
