@@ -2,8 +2,7 @@
 
 go run examples/basic-test/main.go &
 
-sleep 1s
-go run main.go test.go env.go -t examples/basic-test/health.json
+go run main.go test.go env.go -t examples/basic-test/health.json --wait-for-seconds 1
 go run main.go test.go env.go -t examples/basic-test/get-user.json
 go run main.go test.go env.go -t examples/basic-test/get-users.json
 go run main.go test.go env.go -t examples/basic-test/get-states.json

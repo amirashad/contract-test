@@ -9,17 +9,19 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	flags "github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.4.0"
+var appVersion = "v0.4.1"
 
 var opts struct {
-	Version  bool   `long:"version" description:"Show version"`
-	EnvFile  string `short:"e" long:"envfile" default:"examples/basic-test/env.json" description:"Environment file"`
-	TestFile string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
+	Version        bool   `long:"version" description:"Show version"`
+	EnvFile        string `short:"e" long:"envfile" default:"examples/basic-test/env.json" description:"Environment file"`
+	TestFile       string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
+	WaitForSeconds int    `short:"s" long:"wait-for-seconds" default:"0" description:"Wait for seconds before sending requests"`
 }
 
 func main() {
@@ -27,6 +29,11 @@ func main() {
 	if opts.Version {
 		fmt.Println(appVersion)
 		os.Exit(0)
+	}
+
+	if opts.WaitForSeconds > 0 {
+		log.Println("Waiting for", opts.WaitForSeconds, "seconds...")
+		time.Sleep(time.Duration(opts.WaitForSeconds) * time.Second)
 	}
 
 	loadEnvFile(opts.EnvFile)
