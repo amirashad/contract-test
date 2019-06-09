@@ -9,19 +9,19 @@ import (
 	"os"
 	"reflect"
 	"strings"
-	"time"
 
 	flags "github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "v0.4.1"
+var appVersion = "v0.4.2"
 
 var opts struct {
-	Version        bool   `long:"version" description:"Show version"`
-	EnvFile        string `short:"e" long:"envfile" default:"examples/basic-test/env.json" description:"Environment file"`
-	TestFile       string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
-	WaitForSeconds int    `short:"s" long:"wait-for-seconds" default:"0" description:"Wait for seconds before sending requests"`
+	Version         bool   `long:"version" description:"Show version"`
+	EnvFile         string `short:"e" long:"envfile" default:"examples/basic-test/env.json" description:"Environment file"`
+	TestFile        string `short:"t" long:"testfile" default:"examples/basic-test/health.json" description:"Test file"`
+	WaitForSeconds  int    `short:"s" long:"wait-for-seconds" default:"0" description:"Wait for seconds before sending requests"`
+	WaitForEndpoint string `short:"u" long:"wait-for-endpoint" default:"" description:"Wait for endpoint to return HTTP 200 before sending requests. Timeout is 3 min."`
 }
 
 func main() {
@@ -31,10 +31,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if opts.WaitForSeconds > 0 {
-		log.Println("Waiting for", opts.WaitForSeconds, "seconds...")
-		time.Sleep(time.Duration(opts.WaitForSeconds) * time.Second)
-	}
+	waitForSeconds(opts.WaitForSeconds)
+	waitForEndpoint(opts.WaitForEndpoint)
 
 	loadEnvFile(opts.EnvFile)
 	loadTestFile(opts.TestFile)
