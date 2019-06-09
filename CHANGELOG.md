@@ -1,8 +1,9 @@
 # Change log
 
-## v0.4.1 (2019-06-08)
+## v0.4.2 (2019-06-08)
 
  - Wait for seconds on startup before sending requests
+ - Wait for some endpoint on startup before sending requests
 
 ## v0.4.0 (2019-06-06)
 

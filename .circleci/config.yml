@@ -20,7 +20,7 @@ commands:
             name: Run mock server & execute example contract tests
             command: |
               go run examples/basic-test/main.go &
-              ./contract-test -t examples/basic-test/health.json --wait-for-seconds 2
+              ./contract-test -t examples/basic-test/health.json --wait-for-endpoint "http://localhost:8080/health"
               ./contract-test -t examples/basic-test/get-user.json
               ./contract-test -t examples/basic-test/get-users.json
               ./contract-test -t examples/basic-test/get-states.json
